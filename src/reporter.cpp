@@ -41,6 +41,8 @@ void begin() {
 
 const char* url() { return g_url.c_str(); }
 
+bool pending() { return g_pending; }
+
 void setUrl(const char* newUrl) {
     String s(newUrl ? newUrl : "");
     if (s == g_url) return;

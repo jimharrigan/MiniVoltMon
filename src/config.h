@@ -24,6 +24,16 @@
 #define VOLTAGE_SAMPLE_INTERVAL_MS  100   // ~10 Hz sampling
 #define SIG_CHANGE_V                0.050f  // report when the average moves this much
 
+// --- Deep sleep ------------------------------------------------------------
+// Duty cycle: each wake connects WiFi, takes one reading, reports it, then the
+// board deep-sleeps for this long before repeating. The chip resets on wake, so
+// every cycle is a fresh boot through setup().
+#define DEEP_SLEEP_MINUTES          10
+// Safety cap on time spent awake per cycle. If WiFi never connects or the send
+// keeps failing, sleep anyway after this long so a stuck cycle can't sit awake
+// draining the battery — the reading is simply retried next wake.
+#define MAX_AWAKE_MS                60000
+
 // --- WiFi / provisioning (same code as esp-voltage-monitor) ----------------
 #define WIFI_AP_NAME                "MiniVoltMon-Setup"
 #define WIFI_PORTAL_TIMEOUT_S       30

@@ -11,5 +11,6 @@ const char* url();                  // current URL ("" if unset)
 void setUrl(const char* newUrl);    // persist URL if changed
 void queueMetric(float value);      // mark the latest reading for HTTP send
 void tick();                        // drive HTTP send with bounded backoff
+bool pending();                     // true while a queued send has not yet succeeded
 
 }  // namespace reporter
