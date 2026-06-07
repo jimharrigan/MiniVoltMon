@@ -36,14 +36,16 @@ a matching `foo.h` / `foo.cpp`, mirroring esp-voltage-monitor's conventions.
   factory-calibrated reading at `PIN_VOLTAGE_ADC`, scaled by `ADC_DIVIDER_RATIO`
   and offset by `ADC_OFFSET_V`.
 - `netclock` (WiFiManager + NTP) — copied from esp-voltage-monitor. `begin(openPortalIfNeeded)`
-  provisions WiFi and the **Reporting URL** portal parameter. With no stored
-  credentials the portal (AP `MiniVoltMon-Setup`, `192.168.4.1`) opens
-  automatically; holding the BOOT button at startup forces it open even when
+  provisions WiFi and the **Reporting URL** and **Device name** portal parameters.
+  With no stored credentials the portal (AP `MiniVoltMon-Setup`, `192.168.4.1`)
+  opens automatically; holding the BOOT button at startup forces it open even when
   credentials exist. NTP is carried over from the reference but unused here.
 - `reporter` — single-metric HTTP reporter, same mechanism as esp-voltage-monitor:
-  an NVS-persisted base URL (set in the portal) to which the query tail
-  `miniVoltMon&value=V` is appended, with a settle/debounce window and bounded
-  exponential backoff shared across attempts.
+  an NVS-persisted base URL plus an NVS-persisted device name (both set in the
+  portal), to which the query tail `<name>&value=V` is appended, with a
+  settle/debounce window and bounded exponential backoff shared across attempts.
+  The device name is the reporting key (default `miniVoltMon`); empty input is
+  ignored so the key can never become blank.
 
 `main.cpp` samples every `VOLTAGE_SAMPLE_INTERVAL_MS` into a rolling average of
 `VOLTAGE_AVG_SAMPLES`, and queues an HTTP send whenever the average moves by at
@@ -66,4 +68,6 @@ The WiFi/provisioning (`netclock`) and reporting (`reporter`) code are ported
 from `../esp-voltage-monitor` with the multi-channel ADS1115 path replaced by a
 single internal-ADC channel. Sample averaging (`VOLTAGE_AVG_SAMPLES`,
 `VOLTAGE_SAMPLE_INTERVAL_MS`) and the `SIG_CHANGE_V` threshold are kept identical.
-The reported metric key is `miniVoltMon` (vs. that project's `voltMon_chN`).
+The reported metric key defaults to `miniVoltMon` (vs. that project's
+`voltMon_chN`) but is portal-configurable per device via the **Device name**
+field (`DEFAULT_DEVICE_NAME` seeds it on first boot).

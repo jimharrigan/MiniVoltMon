@@ -9,11 +9,11 @@
 
 namespace reporter {
 
-// URL key sent for the metric. Appears as its own line on the shared web page.
-static const char* const METRIC_KEY = "miniVoltMon";
-
 static Preferences prefs;
 static String g_url;
+// Metric key / device name sent for the value. Appears as its own line on the
+// shared web page. Portal-configurable and NVS-persisted, like the URL.
+static String g_name;
 
 // Pending send. Latest value wins if the metric changes again before its
 // previous send succeeds. g_settleMs is the earliest time it may be sent; every
@@ -36,10 +36,17 @@ void begin() {
         prefs.putString("url", g_url);
         Serial.printf("[reporter] seeded url from default\n");
     }
-    Serial.printf("[reporter] url='%s'\n", g_url.c_str());
+    g_name = prefs.getString("name", "");
+    if (g_name.length() == 0) {
+        g_name = DEFAULT_DEVICE_NAME;     // first-boot seed; portal can override
+        prefs.putString("name", g_name);
+        Serial.printf("[reporter] seeded name from default\n");
+    }
+    Serial.printf("[reporter] url='%s' name='%s'\n", g_url.c_str(), g_name.c_str());
 }
 
 const char* url() { return g_url.c_str(); }
+const char* name() { return g_name.c_str(); }
 
 bool pending() { return g_pending; }
 
@@ -49,6 +56,14 @@ void setUrl(const char* newUrl) {
     g_url = s;
     prefs.putString("url", g_url);
     Serial.printf("[reporter] url updated: %s\n", g_url.c_str());
+}
+
+void setName(const char* newName) {
+    String s(newName ? newName : "");
+    if (s.length() == 0 || s == g_name) return;  // ignore empty; key must be non-empty
+    g_name = s;
+    prefs.putString("name", g_name);
+    Serial.printf("[reporter] name updated: %s\n", g_name.c_str());
 }
 
 void queueMetric(float value) {
@@ -77,9 +92,9 @@ void tick() {
     }
 
     // The configured URL is expected to end with the key prefix (e.g.
-    // ".../set?key="). Append "miniVoltMon&value=V".
-    char tail[64];
-    snprintf(tail, sizeof(tail), "%s&value=%.3f", METRIC_KEY, g_pendingV);
+    // ".../set?key="). Append "<name>&value=V".
+    char tail[DEVICE_NAME_MAX_LEN + 32];
+    snprintf(tail, sizeof(tail), "%s&value=%.3f", g_name.c_str(), g_pendingV);
     String url = g_url + tail;
 
     HTTPClient http;

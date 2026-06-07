@@ -26,15 +26,21 @@ bool begin(bool openPortalIfNeeded) {
     WiFiManager wm;
 
     WiFiManagerParameter urlParam("url", "Reporting URL", reporter::url(), 256);
+    WiFiManagerParameter nameParam("name", "Device name (reporting key)",
+                                   reporter::name(), DEVICE_NAME_MAX_LEN);
     wm.addParameter(&urlParam);
+    wm.addParameter(&nameParam);
 
-    // Persist URL the moment the form is submitted (covers /wifisave when the
-    // user enters URL + WiFi creds together, and /paramsave for URL-only
-    // updates). Without this, a reset before STA actually associates would
-    // lose an in-memory-only URL value.
-    auto persistUrl = [&urlParam]() { reporter::setUrl(urlParam.getValue()); };
-    wm.setSaveConfigCallback(persistUrl);
-    wm.setSaveParamsCallback(persistUrl);
+    // Persist URL + name the moment the form is submitted (covers /wifisave when
+    // the user enters them together with WiFi creds, and /paramsave for
+    // settings-only updates). Without this, a reset before STA actually
+    // associates would lose in-memory-only values.
+    auto persistParams = [&urlParam, &nameParam]() {
+        reporter::setUrl(urlParam.getValue());
+        reporter::setName(nameParam.getValue());
+    };
+    wm.setSaveConfigCallback(persistParams);
+    wm.setSaveParamsCallback(persistParams);
 
     if (!openPortalIfNeeded) {
         wm.setEnableConfigPortal(true);   // open portal automatically if saved creds fail
@@ -54,6 +60,7 @@ bool begin(bool openPortalIfNeeded) {
         wm.stopConfigPortal();
         wifiOk = true;
         reporter::setUrl(urlParam.getValue());
+        reporter::setName(nameParam.getValue());
     }
 
     if (!wifiOk) {

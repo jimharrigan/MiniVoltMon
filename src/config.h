@@ -50,6 +50,11 @@
 // esp-voltage-monitor endpoint). The portal can still override it later. Set to
 // "" to disable seeding.
 #define DEFAULT_REPORT_URL          "http://jimharrigan.com/kvp/set?key="
+// Device name = the reporting key appended to the URL (".../set?key=NAME&value=V").
+// Set via the WiFi portal and persisted in NVS; this is the first-boot seed.
+#define DEFAULT_DEVICE_NAME         "miniVoltMon"
+// Max length of the device name (portal field width and on-stack buffer sizing).
+#define DEVICE_NAME_MAX_LEN         32
 #define HTTP_TIMEOUT_MS             2000
 #define RETRY_INITIAL_MS            2000
 #define RETRY_MAX_MS                60000
