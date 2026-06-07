@@ -6,10 +6,13 @@
 // it is not a boot strapping pin, so it is the safe default.
 #define PIN_VOLTAGE_ADC    3
 
-// Hold the on-board BOOT button (GPIO9, active-low) at startup to force the
-// WiFi config portal open even when credentials are already stored. With no
-// stored credentials the portal opens automatically regardless of the button.
-#define PIN_CONFIG_BUTTON  9
+// Pull GPIO0 low (button to GND, active-low) to open the WiFi config portal.
+// The portal stays up for as long as the pin is held low; releasing it closes
+// the portal and the device connects with whatever credentials are now stored.
+// With no stored credentials the portal opens automatically regardless of the
+// pin. Unlike the BOOT button (GPIO9), GPIO0 is not a strapping pin, so it can
+// be held across a hardware reset without dropping into ROM download mode.
+#define PIN_CONFIG_BUTTON  0
 
 // --- ADC scaling -----------------------------------------------------------
 // The internal ADC reads the voltage at PIN_VOLTAGE_ADC directly (0..~3.3 V

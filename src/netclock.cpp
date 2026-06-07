@@ -15,8 +15,9 @@ static bool ntpOk = false;
 static uint32_t lastReconnectMs = 0;
 
 bool configRequested() {
-    // BOOT button on the ESP32-C3 SuperMini is GPIO9, pulled high and driven
-    // low while pressed. Hold it at startup to force the config portal open.
+    // Config pin is GPIO0, held high by the internal pull-up and driven low by
+    // a button to GND. Held low at startup, it opens the config portal (which
+    // then stays up until the pin is released — see begin()).
     pinMode(PIN_CONFIG_BUTTON, INPUT_PULLUP);
     delayMicroseconds(50);
     return digitalRead(PIN_CONFIG_BUTTON) == LOW;
@@ -47,20 +48,33 @@ bool begin(bool openPortalIfNeeded) {
         wm.setConfigPortalTimeout(WIFI_PORTAL_TIMEOUT_S);
         wifiOk = wm.autoConnect(WIFI_AP_NAME);
     } else {
-        // Portal stays up until the user connects via it (or the device is
-        // reset). No timeout — non-blocking only so we can poll WiFi state.
+        // Portal stays up for as long as the config pin is held low. Releasing
+        // it closes the portal and we proceed with whatever creds are now
+        // stored. No timeout — non-blocking so we can poll the pin each pass.
+        pinMode(PIN_CONFIG_BUTTON, INPUT_PULLUP);
         wm.setConfigPortalBlocking(false);
         wm.setConfigPortalTimeout(0);
         wm.startConfigPortal(WIFI_AP_NAME);
 
-        while (WiFi.status() != WL_CONNECTED) {
+        while (digitalRead(PIN_CONFIG_BUTTON) == LOW) {
             wm.process();
             delay(10);
         }
         wm.stopConfigPortal();
-        wifiOk = true;
+
         reporter::setUrl(urlParam.getValue());
         reporter::setName(nameParam.getValue());
+
+        // The user may have released the pin before the link came up (or without
+        // touching WiFi at all). If we aren't connected yet, give stored creds a
+        // chance to associate before falling through to the no-WiFi path.
+        if (WiFi.status() != WL_CONNECTED) {
+            WiFi.mode(WIFI_STA);
+            WiFi.begin();   // use creds saved in NVS (by the portal or earlier)
+            uint32_t deadline = millis() + 10000;
+            while (WiFi.status() != WL_CONNECTED && millis() < deadline) delay(50);
+        }
+        wifiOk = (WiFi.status() == WL_CONNECTED);
     }
 
     if (!wifiOk) {
