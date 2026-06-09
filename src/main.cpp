@@ -39,12 +39,18 @@ void setup() {
     Serial.begin(115200);
     delay(100);
     Serial.println("\n[boot] MiniVoltMon");
-    bootMs = millis();
 
     adc::begin();
     reporter::begin();
 
     bool wantPortal = netclock::configRequested();
+
+    // Settle delay on every power-up and deep-sleep wake, taken after the config
+    // button is read so it need not be held through the wait.
+    Serial.printf("[boot] settling for %d ms\n", STARTUP_DELAY_MS);
+    delay(STARTUP_DELAY_MS);
+    bootMs = millis();
+
     Serial.println(wantPortal ? "[wifi] config portal..." : "[wifi] connect...");
     netclock::begin(wantPortal);
     Serial.printf("[wifi] %s\n", netclock::wifiConnected() ? "ok" : "no");

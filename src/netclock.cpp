@@ -15,7 +15,7 @@ static bool ntpOk = false;
 static uint32_t lastReconnectMs = 0;
 
 bool configRequested() {
-    // Config pin is GPIO0, held high by the internal pull-up and driven low by
+    // Config pin is GPIO1, held high by the internal pull-up and driven low by
     // a button to GND. Held low at startup, it opens the config portal (which
     // then stays up until the pin is released — see begin()).
     pinMode(PIN_CONFIG_BUTTON, INPUT_PULLUP);

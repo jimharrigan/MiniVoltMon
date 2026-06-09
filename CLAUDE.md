@@ -38,8 +38,8 @@ a matching `foo.h` / `foo.cpp`, mirroring esp-voltage-monitor's conventions.
 - `netclock` (WiFiManager + NTP) — copied from esp-voltage-monitor. `begin(openPortalIfNeeded)`
   provisions WiFi and the **Reporting URL** and **Device name** portal parameters.
   With no stored credentials the portal (AP `MiniVoltMon-Setup`, `192.168.4.1`)
-  opens automatically; pulling GPIO0 low at startup forces it open even when
-  credentials exist, and keeps it open for as long as GPIO0 is held. NTP is
+  opens automatically; pulling GPIO1 low at startup forces it open even when
+  credentials exist, and keeps it open for as long as GPIO1 is held. NTP is
   carried over from the reference but unused here.
 - `reporter` — single-metric HTTP reporter, same mechanism as esp-voltage-monitor:
   an NVS-persisted base URL plus an NVS-persisted device name (both set in the
@@ -56,10 +56,10 @@ least `SIG_CHANGE_V` since the last send. All tunables live in `src/config.h`.
 
 - Analog input defaults to **GPIO3** (ADC1_CH3). Use an ADC1 pin (GPIO0..4):
   ADC2 is unusable while WiFi is active. GPIO3 is not a strapping pin.
-- Config trigger is **GPIO0 (active-low)**, a button to GND. The portal stays
-  open for as long as GPIO0 is held low; release it and the device connects with
+- Config trigger is **GPIO1 (active-low)**, a button to GND. The portal stays
+  open for as long as GPIO1 is held low; release it and the device connects with
   whatever creds are stored (or rely on the automatic portal when no creds are
-  stored). GPIO0 is *not* a strapping pin on the ESP32-C3, so unlike the BOOT
+  stored). GPIO1 is *not* a strapping pin on the ESP32-C3, so unlike the BOOT
   button (GPIO9) it can be held across a hardware reset without entering ROM
   download mode.
 - The internal ADC reads 0..~3.3 V at the pin. For higher inputs add an external

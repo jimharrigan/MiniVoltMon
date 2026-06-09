@@ -6,26 +6,32 @@
 // it is not a boot strapping pin, so it is the safe default.
 #define PIN_VOLTAGE_ADC    3
 
-// Pull GPIO0 low (button to GND, active-low) to open the WiFi config portal.
+// Pull GPIO1 low (button to GND, active-low) to open the WiFi config portal.
 // The portal stays up for as long as the pin is held low; releasing it closes
 // the portal and the device connects with whatever credentials are now stored.
 // With no stored credentials the portal opens automatically regardless of the
-// pin. Unlike the BOOT button (GPIO9), GPIO0 is not a strapping pin, so it can
+// pin. Unlike the BOOT button (GPIO9), GPIO1 is not a strapping pin, so it can
 // be held across a hardware reset without dropping into ROM download mode.
-#define PIN_CONFIG_BUTTON  0
+#define PIN_CONFIG_BUTTON  1
 
 // --- ADC scaling -----------------------------------------------------------
 // The internal ADC reads the voltage at PIN_VOLTAGE_ADC directly (0..~3.3 V
 // with 11 dB attenuation). If the input goes through a resistor divider, set
 // ADC_DIVIDER_RATIO = (R_top + R_bot) / R_bot. Default 1.0 = measure the pin
 // voltage as-is. ADC_OFFSET_V nulls residual error at 0 V.
-#define ADC_DIVIDER_RATIO  1.0f
-#define ADC_OFFSET_V       0.0f
+// Two-point calibration: pin 1.971 V -> 13.98 V, pin 0.677 V -> 4.995 V.
+#define ADC_DIVIDER_RATIO  6.9436f
+#define ADC_OFFSET_V       -0.2942f
 
 // --- Sampling / averaging (same as esp-voltage-monitor) --------------------
 #define VOLTAGE_AVG_SAMPLES         10    // rolling average window
 #define VOLTAGE_SAMPLE_INTERVAL_MS  100   // ~10 Hz sampling
 #define SIG_CHANGE_V                0.050f  // report when the average moves this much
+
+// --- Startup ---------------------------------------------------------------
+// Settle delay at the very start of every boot/wake before any work begins, so
+// supply rails and the input under test can stabilize first.
+#define STARTUP_DELAY_MS            5000
 
 // --- Deep sleep ------------------------------------------------------------
 // Duty cycle: each wake connects WiFi, takes one reading, reports it, then the
