@@ -19,9 +19,9 @@
 // with 11 dB attenuation). If the input goes through a resistor divider, set
 // ADC_DIVIDER_RATIO = (R_top + R_bot) / R_bot. Default 1.0 = measure the pin
 // voltage as-is. ADC_OFFSET_V nulls residual error at 0 V.
-// Two-point calibration: pin 1.971 V -> 13.98 V, pin 0.677 V -> 4.995 V.
-#define ADC_DIVIDER_RATIO  6.9436f
-#define ADC_OFFSET_V       -0.2942f
+// Two-point calibration: pin 0.7142 V -> 4.995 V, pin 1.7893 V -> 12.48 V.
+#define ADC_DIVIDER_RATIO  6.9622f
+#define ADC_OFFSET_V       -0.0229f
 
 // --- Sampling / averaging (same as esp-voltage-monitor) --------------------
 #define VOLTAGE_AVG_SAMPLES         10    // rolling average window
@@ -31,13 +31,13 @@
 // --- Startup ---------------------------------------------------------------
 // Settle delay at the very start of every boot/wake before any work begins, so
 // supply rails and the input under test can stabilize first.
-#define STARTUP_DELAY_MS            5000
+#define STARTUP_DELAY_MS            2000
 
 // --- Deep sleep ------------------------------------------------------------
 // Duty cycle: each wake connects WiFi, takes one reading, reports it, then the
 // board deep-sleeps for this long before repeating. The chip resets on wake, so
 // every cycle is a fresh boot through setup().
-#define DEEP_SLEEP_MINUTES          10
+#define DEEP_SLEEP_MINUTES          60
 // Safety cap on time spent awake per cycle. If WiFi never connects or the send
 // keeps failing, sleep anyway after this long so a stuck cycle can't sit awake
 // draining the battery — the reading is simply retried next wake.
