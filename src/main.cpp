@@ -55,6 +55,9 @@ void setup() {
     netclock::begin(wantPortal);
     Serial.printf("[wifi] %s\n", netclock::wifiConnected() ? "ok" : "no");
 
+    // Let the supply settle after WiFi brings the radio up before sampling.
+    delay(POST_WIFI_DELAY_MS);
+
     // Take one averaged reading and queue it for this wake's single report.
     float avg = 0;
     for (int i = 0; i < VOLTAGE_AVG_SAMPLES; i++) avg = pushSample(adc::readVolts());

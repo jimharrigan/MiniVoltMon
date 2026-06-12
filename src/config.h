@@ -20,18 +20,21 @@
 // ADC_DIVIDER_RATIO = (R_top + R_bot) / R_bot. Default 1.0 = measure the pin
 // voltage as-is. ADC_OFFSET_V nulls residual error at 0 V.
 // Two-point calibration: pin 0.7142 V -> 4.995 V, pin 1.7893 V -> 12.48 V.
-#define ADC_DIVIDER_RATIO  6.9622f
-#define ADC_OFFSET_V       -0.0229f
+#define ADC_DIVIDER_RATIO  6.9885f
+#define ADC_OFFSET_V       -0.0f
 
 // --- Sampling / averaging (same as esp-voltage-monitor) --------------------
 #define VOLTAGE_AVG_SAMPLES         10    // rolling average window
 #define VOLTAGE_SAMPLE_INTERVAL_MS  100   // ~10 Hz sampling
-#define SIG_CHANGE_V                0.050f  // report when the average moves this much
+#define SIG_CHANGE_V                0.005f  // report when the average moves this much
 
 // --- Startup ---------------------------------------------------------------
 // Settle delay at the very start of every boot/wake before any work begins, so
 // supply rails and the input under test can stabilize first.
 #define STARTUP_DELAY_MS            2000
+// Settle delay after WiFi connects, before the voltage is sampled, so the radio
+// powering up doesn't perturb the reading.
+#define POST_WIFI_DELAY_MS         1000
 
 // --- Deep sleep ------------------------------------------------------------
 // Duty cycle: each wake connects WiFi, takes one reading, reports it, then the
